@@ -7,8 +7,9 @@ import { UpdateUsersDTO } from './dtos/update-users-dto';
 
 export interface IUsersService {
     getAll(): Promise<any[]>
-    getFirstOrDefault(username: string): Promise<any>
-    getFirstOrThrow(id: string): Promise<Users>
+    getFirstOrDefaultByUsername(username: string): Promise<any>
+    getFirstOrDefaultById(id: string): Promise<any>
+    getFirstOrThrow(username: string): Promise<Users>
     create(createUserDTO: CreateUserDTO): Promise<any>
     update(id: string, updateUserDTO: UpdateUsersDTO): Promise<any>
     delete(id: string): Promise<boolean>
@@ -33,7 +34,7 @@ export class UsersService implements IUsersService {
         });
     }
 
-    async getFirstOrDefault(username: string): Promise<any> {
+    async getFirstOrDefaultByUsername(username: string): Promise<any> {
         return await this.prismaService.users.findFirst({
             where: { username: username },
             select: {
@@ -46,15 +47,28 @@ export class UsersService implements IUsersService {
         });
     }
 
-    async getFirstOrThrow(id: string): Promise<Users> {
+    async getFirstOrDefaultById(id: string): Promise<any> {
+        return await this.prismaService.users.findFirst({
+            where: { id: id },
+            select: {
+                id: true,
+                username: true,
+                createdAt: true,
+                updatedAt: true,
+                accessType: true,
+            }
+        });
+    }
+
+    async getFirstOrThrow(username: string): Promise<Users> {
         return await this.prismaService.users.findFirstOrThrow({
-            where: { id: id }
+            where: { username }
         });
     }
 
     async create(createUserDTO: CreateUserDTO): Promise<any> {
         try {
-            const savedUser = this.getFirstOrDefault(createUserDTO.username);
+            const savedUser = await this.getFirstOrDefaultByUsername(createUserDTO.username);
 
             if (savedUser) {
                 throw new Error("Usuário ou senha incorretos.")

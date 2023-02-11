@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseUUIDPipe, InternalServerErrorException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseUUIDPipe, InternalServerErrorException, HttpStatus, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDTO } from './dtos/create-user-dto';
 import { UpdateUsersDTO } from './dtos/update-users-dto';
 import { UsersService } from './users.service';
 
 @Controller('api/users')
+@UseGuards(AuthGuard('jwt'))
 export class UsersController {
     constructor(
         private readonly usersService: UsersService
@@ -13,6 +15,18 @@ export class UsersController {
     async getAll() {
         try {
             return this.usersService.getAll();
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Get(':id')
+    async getFirst(@Param('id', new ParseUUIDPipe()) id: string) {
+        try {
+            return this.usersService.getFirstOrDefaultById(id);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
