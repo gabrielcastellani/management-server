@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -15,13 +16,14 @@ import { JwtModule } from '@nestjs/jwt';
     PassportModule,
     JwtModule.register({
       privateKey: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: "60s" }
+      signOptions: { expiresIn: "60m" }
     }),
   ],
   providers: [
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    RolesGuard,
   ],
   controllers: [AuthController],
 })

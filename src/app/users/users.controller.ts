@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, ParseUUIDPipe, InternalServerErrorException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { AccessType } from './dtos/access-types';
 import { CreateUserDTO } from './dtos/create-user-dto';
 import { UpdateUsersDTO } from './dtos/update-users-dto';
 import { UsersService } from './users.service';
@@ -24,6 +26,7 @@ export class UsersController {
     }
 
     @Get(':id')
+    @Roles(AccessType.Administrator)
     async getFirst(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return this.usersService.getFirstOrDefaultById(id);
@@ -36,6 +39,7 @@ export class UsersController {
     }
 
     @Post()
+    @Roles(AccessType.Administrator)
     async insert(@Body() createUserDTO: CreateUserDTO) {
         try {
             return await this.usersService.create(createUserDTO);
