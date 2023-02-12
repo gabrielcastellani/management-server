@@ -20,10 +20,11 @@ model Users {
 }
 
 model Customers {
-  id       String @id @default(uuid())
+  id       String     @id @default(uuid())
   name     String
-  cnpj     String @unique
+  cnpj     String     @unique
   initials String
+  Products Products[]
 }
 
 model Employees {
@@ -53,4 +54,19 @@ model Payrolls {
   date            DateTime
   idEmployee      String
   employee        Employees @relation(fields: [idEmployee], references: [id])
+}
+
+model Products {
+  id             String    @id @default(uuid())
+  reference      String
+  of             String
+  description    String?
+  quantity       Decimal
+  unitaryValue   Decimal
+  amount         Decimal
+  status         Int
+  image          String?
+  completionDate DateTime?
+  idCustomer     String
+  customer       Customers @relation(fields: [idCustomer], references: [id])
 }
