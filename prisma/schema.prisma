@@ -33,3 +33,11 @@ model Employees {
   birthDate DateTime
   active    Boolean
 }
+
+model Expenses {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  value       Decimal
+  date        DateTime
+}
