@@ -25,3 +25,11 @@ model Customers {
   cnpj     String @unique
   initials String
 }
+
+model Employees {
+  id        String   @id @default(uuid())
+  name      String
+  cpf       String
+  birthDate DateTime
+  active    Boolean
+}
