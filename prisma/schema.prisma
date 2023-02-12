@@ -27,11 +27,12 @@ model Customers {
 }
 
 model Employees {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   name      String
   cpf       String
   birthDate DateTime
   active    Boolean
+  Payrolls  Payrolls[]
 }
 
 model Expenses {
@@ -40,4 +41,16 @@ model Expenses {
   description String?
   value       Decimal
   date        DateTime
+}
+
+model Payrolls {
+  id              String    @id @default(uuid())
+  salary          Decimal
+  attendanceAward Decimal
+  productionAward Decimal
+  overtime        Decimal
+  salaryToBePaid  Decimal
+  date            DateTime
+  idEmployee      String
+  employee        Employees @relation(fields: [idEmployee], references: [id])
 }
