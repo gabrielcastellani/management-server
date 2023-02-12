@@ -57,7 +57,7 @@ model Payrolls {
 }
 
 model Products {
-  id             String    @id @default(uuid())
+  id             String          @id @default(uuid())
   reference      String
   of             String
   description    String?
@@ -68,5 +68,14 @@ model Products {
   image          String?
   completionDate DateTime?
   idCustomer     String
-  customer       Customers @relation(fields: [idCustomer], references: [id])
+  customer       Customers       @relation(fields: [idCustomer], references: [id])
+  ProductOrders  ProductOrders[]
+}
+
+model ProductOrders {
+  id        String   @id @default(uuid())
+  priority  Int
+  order     Int
+  idProduct String
+  product   Products @relation(fields: [idProduct], references: [id])
 }
