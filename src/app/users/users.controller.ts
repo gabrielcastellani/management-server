@@ -14,6 +14,7 @@ export class UsersController {
     ) { }
 
     @Get()
+    @Roles(AccessType.Administrator)
     async getAll() {
         try {
             return this.usersService.getAll();
@@ -52,6 +53,7 @@ export class UsersController {
     }
 
     @Put(':id')
+    @Roles(AccessType.Administrator)
     async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateUserDTO: UpdateUsersDTO) {
         try {
             return await this.usersService.update(id, updateUserDTO);
@@ -64,6 +66,7 @@ export class UsersController {
     }
 
     @Delete(':id')
+    @Roles(AccessType.Administrator)
     async destroy(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return await this.usersService.delete(id);
