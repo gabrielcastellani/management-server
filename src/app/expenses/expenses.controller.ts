@@ -1,22 +1,22 @@
-import { Controller, Get, Post, Put, Delete, InternalServerErrorException, UseGuards, HttpStatus, Param, ParseUUIDPipe, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseUUIDPipe, InternalServerErrorException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
-import { EmployeesService } from './employees.service';
-import { CreateEmployeeDTO } from './dtos/create-employee-dto';
-import { UpdateEmployeeDTO } from './dtos/update-employee-dto';
+import { CreateExpenseDTO } from './dtos/create-expense-dto';
+import { UpdateExpenseDTO } from './dtos/update-expense-dto';
+import { ExpensesService } from './expenses.service';
 
-@Controller('api/employees')
+@Controller('api/expenses')
 @UseGuards(AuthGuard('jwt'))
-export class EmployeesController {
+export class ExpensesController {
     constructor(
-        private readonly employeesService: EmployeesService
+        private readonly expensesService: ExpensesService
     ) { }
 
     @Get()
     async getAll() {
         try {
-            return await this.employeesService.getAll();
+            return await this.expensesService.getAll();
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -26,9 +26,9 @@ export class EmployeesController {
     }
 
     @Get(':id')
-    async getFirst(@Param('id', new ParseUUIDPipe()) id: string) {
+    async getFirstOrDefault(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
-            return await this.employeesService.getFirstOrDefaultById(id);
+            return await this.expensesService.getFirstOrDefault(id);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -39,9 +39,9 @@ export class EmployeesController {
 
     @Post()
     @Roles(AccessType.Administrator)
-    async create(@Body() createEmployeeDTO: CreateEmployeeDTO) {
+    async create(@Body() createExpenseDTO: CreateExpenseDTO) {
         try {
-            return await this.employeesService.create(createEmployeeDTO);
+            return await this.expensesService.create(createExpenseDTO);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -52,9 +52,9 @@ export class EmployeesController {
 
     @Put(':id')
     @Roles(AccessType.Administrator)
-    async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateEmployeeDTO: UpdateEmployeeDTO) {
+    async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateExpenseDTO: UpdateExpenseDTO) {
         try {
-            return await this.employeesService.update(id, updateEmployeeDTO);
+            return await this.expensesService.update(id, updateExpenseDTO);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -65,9 +65,9 @@ export class EmployeesController {
 
     @Delete(':id')
     @Roles(AccessType.Administrator)
-    async destroy(@Param('id', new ParseUUIDPipe()) id: string) {
+    async delete(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
-            return await this.employeesService.delete(id);
+            return this.expensesService.delete(id);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
