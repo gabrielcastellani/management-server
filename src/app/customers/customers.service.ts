@@ -56,7 +56,7 @@ export class CustomersService implements ICustomersService {
         const savedCustomer = await this.getFirstOrDefaultById(id);
 
         if (!savedCustomer)
-            throw new Error("Usuário não foi localizado, tente um identificador válido.");
+            throw new Error("Cliente não foi localizado, tente um identificador válido.");
 
         const savedCustomerWithCNPJ = await this.getFirstOrDefaultByCNPJ(updateCustomerDTO.cnpj);
         
