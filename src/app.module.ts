@@ -6,8 +6,9 @@ import { CustomersModule } from './app/customers/customers.module';
 import { EmployeesModule } from './app/employees/employees.module';
 import { ExpensesModule } from './app/expenses/expenses.module';
 import { PayrollsModule } from './app/payrolls/payrolls.module';
+import { ProductsModule } from './app/products/products.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, CustomersModule, EmployeesModule, ExpensesModule, PayrollsModule],
+  imports: [PrismaModule, UsersModule, AuthModule, CustomersModule, EmployeesModule, ExpensesModule, PayrollsModule, ProductsModule],
 })
 export class AppModule {}
