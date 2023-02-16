@@ -16,6 +16,7 @@ export interface IProductsService {
     delete(id: string): Promise<boolean>
     deleteMany(ids: string[]): Promise<boolean>
     changeProductStatus(id: string, changeStatusDTO: ChangeStatusDTO): Promise<boolean>
+    finishProduct(id: string, date: Date): Promise<boolean>
 }
 
 @Injectable()
@@ -119,6 +120,32 @@ export class ProductsService implements IProductsService {
                 idCustomer: savedProduct.idCustomer,
                 image: savedProduct.image,
                 status: changeStatusDTO.status,
+            },
+        });
+
+        return true;
+    }
+
+    async finishProduct(id: string, date: Date): Promise<boolean> {
+        const savedProduct = await this.getFirstOrDefault(id);
+
+        if(!savedProduct) {
+            throw new Error("Não foi possível localizar o produto informado.");
+        }
+
+        await this.prismaService.products.update({
+            where: { id },
+            data: {
+                reference: savedProduct.reference,
+                of: savedProduct.of,
+                description: savedProduct.description,
+                quantity: savedProduct.quantity,
+                unitaryValue: savedProduct.unitaryValue,
+                amount: savedProduct.amount,
+                completionDate: date,
+                idCustomer: savedProduct.idCustomer,
+                image: savedProduct.image,
+                status: ProductStatus.Finished,
             },
         });
 
