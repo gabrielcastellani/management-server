@@ -79,3 +79,9 @@ model ProductOrders {
   idProduct String
   product   Products @relation(fields: [idProduct], references: [id])
 }
+
+model Goals {
+  id               String @id @default(uuid())
+  currentQuantity  Int    @default(0)
+  expectedQuantity Int    @default(0)
+}
