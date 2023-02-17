@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProductOrders } from '@prisma/client';
+import { GoalsService } from '../goals/goals.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChangeStatusDTO } from '../products/dtos/change-status-dto';
 import { ProductStatus } from '../products/dtos/product-status';
@@ -23,6 +24,7 @@ export class ProductOrdersService implements IProductOrdersService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly productsService: ProductsService,
+        private readonly goalsService: GoalsService
     ) { }
 
     async getAll(): Promise<ProductOrders[]> {
@@ -81,9 +83,8 @@ export class ProductOrdersService implements IProductOrdersService {
         }
 
         await this.productsService.finishProduct(savedOrder.idProduct, finishOrderDTO.date);
-        await this.prismaService.productOrders.delete({
-            where: { id: savedOrder.id }
-        });
+        await this.prismaService.productOrders.delete({ where: { id: savedOrder.id } });
+        await this.updateGoals(savedOrder.idProduct);
 
         return true;
     }
@@ -95,7 +96,7 @@ export class ProductOrdersService implements IProductOrdersService {
 
         await this.productsService.changeProductStatus(savedOrder.idProduct, changeStatusDTO);
         await this.prismaService.productOrders.delete({ where: { id } });
-
+        
         return true;
     }
 
@@ -110,5 +111,13 @@ export class ProductOrdersService implements IProductOrdersService {
         return await this.prismaService.productOrders.findFirst({
             where: { idProduct }
         });
+    }
+
+    private async updateGoals(idProduct: string) {
+        const product = await this.productsService.getFirstOrDefault(idProduct);
+
+        if(product) {
+            await this.goalsService.incrementCurrentQuantity(product.quantity.toNumber());
+        }
     }
 }

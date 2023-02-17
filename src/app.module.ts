@@ -8,8 +8,9 @@ import { ExpensesModule } from './app/expenses/expenses.module';
 import { PayrollsModule } from './app/payrolls/payrolls.module';
 import { ProductsModule } from './app/products/products.module';
 import { ProductOrdersModule } from './app/product-orders/product-orders.module';
+import { GoalsModule } from './app/goals/goals.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, CustomersModule, EmployeesModule, ExpensesModule, PayrollsModule, ProductsModule, ProductOrdersModule],
+  imports: [PrismaModule, UsersModule, AuthModule, CustomersModule, EmployeesModule, ExpensesModule, PayrollsModule, ProductsModule, ProductOrdersModule, GoalsModule],
 })
 export class AppModule {}
