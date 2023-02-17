@@ -66,9 +66,22 @@ export class ProductsService implements IProductsService {
 
     async update(id: string, updateProductDTO: UpdateProductDTO): Promise<Products> {
         const customer = await this.getCustomer(updateProductDTO);
+        const savedProduct = await this.getFirstOrDefault(id);
 
         if (!customer) {
             throw new Error("Cliente selecionado não foi encontrado.")
+        }
+
+        if(!savedProduct) {
+            throw new Error("Não foi possível localizar o produto informado.");
+        }
+
+        if(savedProduct.status == ProductStatus.Finished) {
+            throw new Error("Não é possível atualizar um pedido que já foi finalizado!");
+        }
+
+        if(savedProduct.status == ProductStatus.Canceled) {
+            throw new Error("Não é possível atualizar um pedido que já foi cancelado!");
         }
 
         return await this.prismaService.products.update({

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ProductOrders } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChangeStatusDTO } from '../products/dtos/change-status-dto';
+import { ProductStatus } from '../products/dtos/product-status';
 import { ProductsService } from '../products/products.service';
 import { CreateOrderDTO } from './dtos/create-order-dto';
 import { FinishOrderDTO } from './dtos/finish-order-dto';
@@ -36,9 +38,14 @@ export class ProductOrdersService implements IProductOrdersService {
     async create(createOrderDTO: CreateOrderDTO): Promise<ProductOrders> {
         const savedOrder = await this.getOrderFromProduct(createOrderDTO.idProduct);
 
-        if(savedOrder) {
+        if (savedOrder) {
             throw new Error("Já existe uma ordem de produção para esse pedido.");
         }
+
+        var changeStatusDTO = new ChangeStatusDTO();
+        changeStatusDTO.status = ProductStatus.Progress;
+
+        await this.productsService.changeProductStatus(createOrderDTO.idProduct, changeStatusDTO);
 
         return await this.prismaService.productOrders.create({
             data: {
@@ -52,7 +59,7 @@ export class ProductOrdersService implements IProductOrdersService {
     async update(id: string, updateOrderDTO: UpdateOrderDTO): Promise<ProductOrders> {
         const savedOrder = await this.getFirstOrDefault(id);
 
-        if(!savedOrder) {
+        if (!savedOrder) {
             throw new Error("A ordem de produção informada não foi localizada.");
         }
 
@@ -69,26 +76,32 @@ export class ProductOrdersService implements IProductOrdersService {
     async finisheOrder(id: string, finishOrderDTO: FinishOrderDTO): Promise<boolean> {
         const savedOrder = await this.getFirstOrDefault(id);
 
-        if(!savedOrder) {
+        if (!savedOrder) {
             throw new Error("A ordem de produção informada não foi localizada.");
         }
 
-        await this.productsService.finishProduct(savedOrder.id, finishOrderDTO.date);
-        await this.delete(savedOrder.id);
+        await this.productsService.finishProduct(savedOrder.idProduct, finishOrderDTO.date);
+        await this.prismaService.productOrders.delete({
+            where: { id: savedOrder.id }
+        });
 
         return true;
     }
 
     async delete(id: string): Promise<boolean> {
-        await this.prismaService.productOrders.delete({
-            where: { id }
-        });
+        const savedOrder = await this.getFirstOrDefault(id);
+        var changeStatusDTO = new ChangeStatusDTO();
+        changeStatusDTO.status = ProductStatus.Pending;
+
+        await this.productsService.changeProductStatus(savedOrder.idProduct, changeStatusDTO);
+        await this.prismaService.productOrders.delete({ where: { id } });
+
         return true;
     }
 
     async deleteMany(ids: string): Promise<boolean> {
         await this.prismaService.productOrders.deleteMany({
-            where: { id: { in: ids }}
+            where: { id: { in: ids } }
         });
         return true;
     }

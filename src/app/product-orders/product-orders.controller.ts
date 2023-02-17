@@ -8,6 +8,7 @@ import { FinishOrderDTO } from './dtos/finish-order-dto';
 import { ProductOrdersService } from './product-orders.service';
 
 @Controller('api/product-orders')
+@UseGuards(AuthGuard('jwt'))
 export class ProductOrdersController {
     constructor(
         private readonly productOrdersService: ProductOrdersService
@@ -38,6 +39,7 @@ export class ProductOrdersController {
     }
 
     @Post()
+    @Roles(AccessType.Administrator)
     async create(@Body() createOrderDTO: CreateOrderDTO) {
         try {
             return await this.productOrdersService.create(createOrderDTO);
@@ -50,6 +52,7 @@ export class ProductOrdersController {
     }
 
     @Put(':id')
+    @Roles(AccessType.Administrator)
     async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateOrderDTO: UpdateOrderDTO) {
         try {
             return await this.productOrdersService.update(id, updateOrderDTO);
@@ -62,6 +65,7 @@ export class ProductOrdersController {
     }
 
     @Put(':id/finish')
+    @Roles(AccessType.Administrator)
     async finish(@Param('id', new ParseUUIDPipe()) id: string, @Body() finishOrderDTO: FinishOrderDTO) {
         try {
             return await this.productOrdersService.finisheOrder(id, finishOrderDTO);
@@ -74,6 +78,7 @@ export class ProductOrdersController {
     }
 
     @Delete(':id')
+    @Roles(AccessType.Administrator)
     async delete(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return await this.productOrdersService.delete(id);
