@@ -28,12 +28,15 @@ export class ProductOrdersService implements IProductOrdersService {
     ) { }
 
     async getAll(): Promise<ProductOrders[]> {
-        return await this.prismaService.productOrders.findMany();
+        return await this.prismaService.productOrders.findMany({
+            include: { product: true, }
+        });
     }
 
     async getFirstOrDefault(id: string): Promise<ProductOrders> {
         return await this.prismaService.productOrders.findFirst({
-            where: { id }
+            where: { id },
+            include: { product: true }
         });
     }
 
@@ -96,7 +99,7 @@ export class ProductOrdersService implements IProductOrdersService {
 
         await this.productsService.changeProductStatus(savedOrder.idProduct, changeStatusDTO);
         await this.prismaService.productOrders.delete({ where: { id } });
-        
+
         return true;
     }
 
@@ -116,7 +119,7 @@ export class ProductOrdersService implements IProductOrdersService {
     private async updateGoals(idProduct: string) {
         const product = await this.productsService.getFirstOrDefault(idProduct);
 
-        if(product) {
+        if (product) {
             await this.goalsService.incrementCurrentQuantity(product.quantity.toNumber());
         }
     }
