@@ -4,6 +4,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
 import { ChangeStatusDTO } from './dtos/change-status-dto';
 import { CreateProductDTO } from './dtos/create-product-dto';
+import { DeleteProductDTO } from './dtos/delete-product-dto';
 import { UpdateProductDTO } from './dtos/update-product-dto';
 import { ProductsService } from './products.service';
 
@@ -95,6 +96,19 @@ export class ProductsController {
     async delete(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return this.productsService.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Delete()
+    @Roles(AccessType.Administrator)
+    async deleteMany(@Body() deleteProductDTO: DeleteProductDTO) {
+        try {
+            return this.productsService.deleteMany(deleteProductDTO.ids);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

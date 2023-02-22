@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
 import { CreateExpenseDTO } from './dtos/create-expense-dto';
+import { DeleteExpenseDTO } from './dtos/delete-expense-dto';
 import { UpdateExpenseDTO } from './dtos/update-expense-dto';
 import { ExpensesService } from './expenses.service';
 
@@ -68,6 +69,19 @@ export class ExpensesController {
     async delete(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return this.expensesService.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Delete()
+    @Roles(AccessType.Administrator)
+    async deleteMany(@Body() deleteExpenseDTO: DeleteExpenseDTO) {
+        try {
+            return this.expensesService.deleteMany(deleteExpenseDTO.ids);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

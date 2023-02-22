@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
 import { CreatePayrollDTO } from './dtos/create-payroll-dto';
+import { DeletePayrollDTO } from './dtos/delete-payroll-dto';
 import { UpdatePayrollDTO } from './dtos/update-payroll-dto';
 import { PayrollsService } from './payrolls.service';
 
@@ -68,6 +69,19 @@ export class PayrollsController {
     async delete(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return this.payrollsService.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Delete()
+    @Roles(AccessType.Administrator)
+    async deleteMany(@Body() deletePayrollDTO: DeletePayrollDTO) {
+        try {
+            return this.payrollsService.deleteMany(deletePayrollDTO.ids);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

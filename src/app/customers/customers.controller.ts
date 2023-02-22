@@ -4,6 +4,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDTO } from './dtos/create-customer-dto';
+import { DeleteCustomerDTO } from './dtos/delete-customer-dto';
 import { UpdateCustomerDTO } from './dtos/update-customer-dto';
 
 @Controller('api/customers')
@@ -68,6 +69,19 @@ export class CustomersController {
     async destroy(@Param('id', new ParseUUIDPipe()) id: string): Promise<boolean> {
         try {
             return await this.customersService.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Delete()
+    @Roles(AccessType.Administrator)
+    async destroyMany(@Body() deleteCustomerDTO: DeleteCustomerDTO) {
+        try {
+            return await this.customersService.deleteRange(deleteCustomerDTO.ids);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
