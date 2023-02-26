@@ -9,6 +9,7 @@ import { UpdateProductDTO } from './dtos/update-product-dto';
 
 export interface IProductsService {
     getAll(): Promise<Products[]>
+    getAllFromStatus(productStatus: ProductStatus): Promise<Products[]>
     getFirstOrDefault(id: string): Promise<Products>
     getAllFromCustomer(idCustomer: string): Promise<Products[]>
     create(createProductDTO: CreateProductDTO): Promise<Products>
@@ -28,6 +29,12 @@ export class ProductsService implements IProductsService {
 
     async getAll(): Promise<Products[]> {
         return await this.prismaService.products.findMany();
+    }
+
+    async getAllFromStatus(productStatus: ProductStatus): Promise<Products[]> {
+        return await this.prismaService.products.findMany({
+            where: { status: productStatus }
+        })
     }
 
     async getFirstOrDefault(id: string): Promise<Products> {
@@ -72,15 +79,15 @@ export class ProductsService implements IProductsService {
             throw new Error("Cliente selecionado não foi encontrado.")
         }
 
-        if(!savedProduct) {
+        if (!savedProduct) {
             throw new Error("Não foi possível localizar o produto informado.");
         }
 
-        if(savedProduct.status == ProductStatus.Finished) {
+        if (savedProduct.status == ProductStatus.Finished) {
             throw new Error("Não é possível atualizar um pedido que já foi finalizado!");
         }
 
-        if(savedProduct.status == ProductStatus.Canceled) {
+        if (savedProduct.status == ProductStatus.Canceled) {
             throw new Error("Não é possível atualizar um pedido que já foi cancelado!");
         }
 
@@ -108,7 +115,7 @@ export class ProductsService implements IProductsService {
 
     async deleteMany(ids: string[]): Promise<boolean> {
         await this.prismaService.products.deleteMany({
-            where: { id: { in: ids }}
+            where: { id: { in: ids } }
         });
         return true;
     }
@@ -116,7 +123,7 @@ export class ProductsService implements IProductsService {
     async changeProductStatus(id: string, changeStatusDTO: ChangeStatusDTO): Promise<boolean> {
         const savedProduct = await this.getFirstOrDefault(id);
 
-        if(!savedProduct) {
+        if (!savedProduct) {
             throw new Error("Não foi possível localizar o produto informado.");
         }
 
@@ -142,7 +149,7 @@ export class ProductsService implements IProductsService {
     async finishProduct(id: string, date: Date): Promise<boolean> {
         const savedProduct = await this.getFirstOrDefault(id);
 
-        if(!savedProduct) {
+        if (!savedProduct) {
             throw new Error("Não foi possível localizar o produto informado.");
         }
 

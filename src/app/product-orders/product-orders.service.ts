@@ -6,6 +6,7 @@ import { ChangeStatusDTO } from '../products/dtos/change-status-dto';
 import { ProductStatus } from '../products/dtos/product-status';
 import { ProductsService } from '../products/products.service';
 import { CreateOrderDTO } from './dtos/create-order-dto';
+import { CreateOrdersDTO } from './dtos/create-orders-dto';
 import { FinishOrderDTO } from './dtos/finish-order-dto';
 import { UpdateOrderDTO } from './dtos/update-order-dto';
 
@@ -13,10 +14,12 @@ export interface IProductOrdersService {
     getAll(): Promise<ProductOrders[]>
     getFirstOrDefault(id: string): Promise<ProductOrders>
     create(createOrderDTO: CreateOrderDTO): Promise<ProductOrders>
+    createMany(createOrdersDTO: CreateOrdersDTO): Promise<ProductOrders[]>
     update(id: string, updateOrderDTO: UpdateOrderDTO): Promise<ProductOrders>
     finisheOrder(id: string, finishOrderDTO: FinishOrderDTO): Promise<boolean>
     delete(id: string): Promise<boolean>
     deleteMany(ids: string): Promise<boolean>
+    deleteAll(): Promise<boolean>
 }
 
 @Injectable()
@@ -59,6 +62,17 @@ export class ProductOrdersService implements IProductOrdersService {
                 idProduct: createOrderDTO.idProduct,
             }
         });
+    }
+
+    async createMany(createOrdersDTO: CreateOrdersDTO): Promise<ProductOrders[]> {
+        const productOrders: ProductOrders[] = [];
+
+        for(let index = 0; index < createOrdersDTO.productOrders.length; index++) {
+            const productOrder = await this.create(createOrdersDTO.productOrders[index]);
+            productOrders.push(productOrder);
+        }
+
+        return productOrders;
     }
 
     async update(id: string, updateOrderDTO: UpdateOrderDTO): Promise<ProductOrders> {
@@ -107,6 +121,16 @@ export class ProductOrdersService implements IProductOrdersService {
         await this.prismaService.productOrders.deleteMany({
             where: { id: { in: ids } }
         });
+        return true;
+    }
+
+    async deleteAll(): Promise<boolean> {
+        const savedOrders = await this.getAll();
+
+        for(let index = 0; index < savedOrders.length; index++) {
+            await this.delete(savedOrders[index].id);
+        }
+
         return true;
     }
 

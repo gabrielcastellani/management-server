@@ -6,6 +6,7 @@ import { CreateOrderDTO } from './dtos/create-order-dto';
 import { UpdateOrderDTO } from './dtos/update-order-dto';
 import { FinishOrderDTO } from './dtos/finish-order-dto';
 import { ProductOrdersService } from './product-orders.service';
+import { CreateOrdersDTO } from './dtos/create-orders-dto';
 
 @Controller('api/product-orders')
 @UseGuards(AuthGuard('jwt'))
@@ -40,9 +41,10 @@ export class ProductOrdersController {
 
     @Post()
     @Roles(AccessType.Administrator)
-    async create(@Body() createOrderDTO: CreateOrderDTO) {
+    async create(@Body() createOrdersDTO: CreateOrdersDTO) {
         try {
-            return await this.productOrdersService.create(createOrderDTO);
+            await this.productOrdersService.deleteAll();
+            return await this.productOrdersService.createMany(createOrdersDTO);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -68,7 +70,12 @@ export class ProductOrdersController {
     @Roles(AccessType.Administrator)
     async finish(@Param('id', new ParseUUIDPipe()) id: string, @Body() finishOrderDTO: FinishOrderDTO) {
         try {
-            return await this.productOrdersService.finisheOrder(id, finishOrderDTO);
+            const success = await this.productOrdersService.finisheOrder(id, finishOrderDTO);
+
+            return {
+                success: success,
+                productOrder: id,
+            }
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

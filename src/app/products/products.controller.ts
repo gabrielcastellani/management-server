@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseUUIDPipe, InternalServerErrorException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseUUIDPipe, InternalServerErrorException, HttpStatus, UseGuards, ParseEnumPipe } from '@nestjs/common';
+import { ParseIntPipe } from '@nestjs/common/pipes';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from '../users/dtos/access-types';
 import { ChangeStatusDTO } from './dtos/change-status-dto';
 import { CreateProductDTO } from './dtos/create-product-dto';
 import { DeleteProductDTO } from './dtos/delete-product-dto';
+import { ProductStatus } from './dtos/product-status';
 import { UpdateProductDTO } from './dtos/update-product-dto';
 import { ProductsService } from './products.service';
 
@@ -19,6 +21,18 @@ export class ProductsController {
     async getAll() {
         try {
             return await this.productsService.getAll();
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Get('status/:productStatus')
+    async getAllInOrder(@Param('productStatus', new ParseIntPipe()) productStatus: number) {
+        try {
+            return await this.productsService.getAllFromStatus(productStatus);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

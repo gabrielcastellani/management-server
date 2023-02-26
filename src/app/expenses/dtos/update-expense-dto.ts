@@ -9,6 +9,5 @@ export class UpdateExpenseDTO {
     value: number
 
     @IsNotEmpty()
-    @IsDate()
     date: Date
 }

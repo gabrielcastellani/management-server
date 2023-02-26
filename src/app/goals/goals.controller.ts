@@ -37,6 +37,20 @@ export class GoalsController {
         }
     }
 
+    @Put()
+    async update(@Body() updateGoalDTO: UpdateGoalDTO) {
+        try {
+            const goal = await this.goalsService.getUnique();
+
+            return await this.goalsService.update(goal.id, updateGoalDTO);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
     @Put('change/expected-quantity')
     @Roles(AccessType.Administrator)
     async changeExpectedQuantity(@Body() updateGoalDTO: UpdateGoalDTO) {
