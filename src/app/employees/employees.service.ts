@@ -11,7 +11,7 @@ export interface IEmployeesService {
     create(createEmployeeDTO: CreateEmployeeDTO): Promise<Employees>
     update(id: string, updateEmployeeDTO: UpdateEmployeeDTO): Promise<Employees>
     delete(id: string): Promise<boolean>
-    deleteMany(ids: string[]): Promise<boolean>
+    deleteMany(ids: string[]): Promise<any>
 }
 
 @Injectable()
@@ -76,16 +76,36 @@ export class EmployeesService implements IEmployeesService {
     }
 
     async delete(id: string): Promise<boolean> {
+        const payroll = await this.prismaService.payrolls.findFirst({
+            where: { idEmployee: id }
+        });
+
+        if(payroll) {
+            throw new Error("O funcionário está vinculado com uma folha de pagamento, a sua remoção não é permitida!");
+        }
+
         await this.prismaService.employees.delete({
             where: { id: id }
         });
+
         return true;
     }
 
-    async deleteMany(ids: string[]): Promise<boolean> {
-        await this.prismaService.employees.deleteMany({
-            where: { id: { in: ids } }
-        });
-        return true;
+    async deleteMany(ids: string[]): Promise<any> {
+        const idsWithError = [];
+
+        for(const id in ids) {
+            try {
+                await this.delete(ids[id]);
+            } catch(error) {
+                idsWithError.push(ids[id]);
+            }
+        }
+        
+        return {
+            success: idsWithError.length == 0,
+            error: "Ação finalizada com erro, existe funcionários selecionados que possuem folha de pagamento e a sua remoção não é permitida!",
+            idsWithError: idsWithError,
+        };
     }
 }

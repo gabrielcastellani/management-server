@@ -11,7 +11,7 @@ export interface ICustomersService {
     create(createCustomerDTO: CreateCustomerDTO): Promise<Customers>
     update(id: string, updateCustomerDTO: UpdateCustomerDTO): Promise<Customers>
     delete(id: string): Promise<boolean>
-    deleteRange(ids: string[]): Promise<boolean>
+    deleteRange(ids: string[]): Promise<any>
 }
 
 @Injectable()
@@ -74,16 +74,36 @@ export class CustomersService implements ICustomersService {
     }
 
     async delete(id: string): Promise<boolean> {
+        const productWithCustomer = await this.prismaService.products.findFirst({
+            where: { idCustomer: id }
+        });
+
+        if(productWithCustomer) {
+            throw new Error("O cliente está vinculado com um produto existente, sua remoção não é permitida!");
+        }
+
         await this.prismaService.customers.delete({
             where: { id: id }
         });
+
         return true;
     }
 
-    async deleteRange(ids: string[]): Promise<boolean> {
-        await this.prismaService.customers.deleteMany({
-            where: { id: { in: ids } }
-        });
-        return true;
+    async deleteRange(ids: string[]): Promise<any> {
+        const idsWithError = [];
+        
+        for(const id in ids) {
+            try {
+                await this.delete(ids[id]);
+            } catch(error) {
+                idsWithError.push(ids[id]);
+            }
+        }
+
+        return {
+            success: true,
+            error: "Ação finalizada com erro, existe clientes selecionados que possuem um produto vinculado e a sua remoção não é permitida!",
+            idsWithError: idsWithError
+        };
     }
 }
