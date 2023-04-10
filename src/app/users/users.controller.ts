@@ -6,6 +6,7 @@ import { CreateUserDTO } from './dtos/create-user-dto';
 import { DeleteUserDTO } from './dtos/delete-user-dto';
 import { UpdateUsersDTO } from './dtos/update-users-dto';
 import { UsersService } from './users.service';
+import { ChangeUserPasswordDTO } from './dtos/change-user-password-dto';
 
 @Controller('api/users')
 @UseGuards(AuthGuard('jwt'))
@@ -58,6 +59,19 @@ export class UsersController {
     async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateUserDTO: UpdateUsersDTO) {
         try {
             return await this.usersService.update(id, updateUserDTO);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Put(':id/change-password')
+    @Roles(AccessType.Administrator)
+    async changePassword(@Param('id', new ParseUUIDPipe()) id: string, @Body() changeUserPasswordDTO: ChangeUserPasswordDTO) {
+        try {
+            return await this.usersService.changePassword(id, changeUserPasswordDTO);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,

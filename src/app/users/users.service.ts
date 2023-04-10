@@ -4,6 +4,7 @@ import { hashPassword } from 'src/helpers/hashing-helper';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDTO } from './dtos/create-user-dto';
 import { UpdateUsersDTO } from './dtos/update-users-dto';
+import { ChangeUserPasswordDTO } from './dtos/change-user-password-dto';
 
 export interface IUsersService {
     getAll(): Promise<any[]>
@@ -12,6 +13,7 @@ export interface IUsersService {
     getFirstOrDefaultById(id: string): Promise<any>
     getFirstOrThrow(username: string): Promise<Users>
     create(createUserDTO: CreateUserDTO): Promise<any>
+    changePassword(id: string, changeUserPasswordDTO: ChangeUserPasswordDTO): Promise<any>
     update(id: string, updateUserDTO: UpdateUsersDTO): Promise<any>
     delete(id: string): Promise<boolean>
     deleteRange(ids: string[]): Promise<boolean>
@@ -85,13 +87,6 @@ export class UsersService implements IUsersService {
                     password: hashPassword(createUserDTO.password),
                     accessType: createUserDTO.accessType,
                 },
-                select: {
-                    id: true,
-                    username: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    accessType: true,
-                }
             });
         } catch (error) {
             throw new Error("Não foi possível criar o usuário.")
@@ -107,16 +102,22 @@ export class UsersService implements IUsersService {
                     accessType: updateUserDTO.accessType,
                     updatedAt: new Date(),
                 },
-                select: {
-                    id: true,
-                    username: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    accessType: true,
-                }
             });
         } catch (error) {
             throw new Error("Não foi possível atualizar o usuário.")
+        }
+    }
+
+    async changePassword(id: string, changeUserPasswordDTO: ChangeUserPasswordDTO): Promise<any> {
+        try {
+            return await this.prismaService.users.update({
+                where: { id: id },
+                data: {
+                    password: hashPassword(changeUserPasswordDTO.password),
+                },
+            });
+        } catch (error) {
+            throw new Error("Não foi possível alterar a senha.");
         }
     }
 
