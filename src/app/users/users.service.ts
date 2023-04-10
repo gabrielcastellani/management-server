@@ -7,6 +7,7 @@ import { UpdateUsersDTO } from './dtos/update-users-dto';
 
 export interface IUsersService {
     getAll(): Promise<any[]>
+    getAllWithoutFilter(): Promise<any[]>
     getFirstOrDefaultByUsername(username: string): Promise<any>
     getFirstOrDefaultById(id: string): Promise<any>
     getFirstOrThrow(username: string): Promise<Users>
@@ -32,6 +33,10 @@ export class UsersService implements IUsersService {
                 accessType: true,
             }
         });
+    }
+
+    async getAllWithoutFilter(): Promise<any[]> {
+        return await this.prismaService.users.findMany();
     }
 
     async getFirstOrDefaultByUsername(username: string): Promise<any> {
@@ -99,7 +104,6 @@ export class UsersService implements IUsersService {
                 where: { id: id },
                 data: {
                     username: updateUserDTO.username,
-                    password: hashPassword(updateUserDTO.password),
                     accessType: updateUserDTO.accessType,
                     updatedAt: new Date(),
                 },

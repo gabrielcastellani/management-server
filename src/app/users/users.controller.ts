@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AccessType } from './dtos/access-types';
 import { CreateUserDTO } from './dtos/create-user-dto';
+import { DeleteUserDTO } from './dtos/delete-user-dto';
 import { UpdateUsersDTO } from './dtos/update-users-dto';
 import { UsersService } from './users.service';
 
@@ -17,7 +18,7 @@ export class UsersController {
     @Roles(AccessType.Administrator)
     async getAll() {
         try {
-            return this.usersService.getAll();
+            return this.usersService.getAllWithoutFilter();
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
@@ -70,6 +71,19 @@ export class UsersController {
     async destroy(@Param('id', new ParseUUIDPipe()) id: string) {
         try {
             return await this.usersService.delete(id);
+        } catch (error) {
+            throw new InternalServerErrorException({
+                status: HttpStatus.FORBIDDEN,
+                error: error.message,
+            }, { cause: error });
+        }
+    }
+
+    @Delete()
+    @Roles(AccessType.Administrator)
+    async deleteMany(@Body() deleteUserDTO: DeleteUserDTO) {
+        try {
+            return this.usersService.deleteRange(deleteUserDTO.ids);
         } catch (error) {
             throw new InternalServerErrorException({
                 status: HttpStatus.FORBIDDEN,
