@@ -7,6 +7,7 @@ import { UpdatePayrollDTO } from './dtos/update-payroll-dto';
 
 export interface IPayrollsService {
     getAll(): Promise<Payrolls[]>
+    getRange(startDate: Date, endDate: Date): Promise<Payrolls[]>
     getFirstOrDefault(id: string): Promise<Payrolls>
     create(createPayrollDTO: CreatePayrollDTO): Promise<Payrolls>
     update(id: string, updatePayrollDTO: UpdatePayrollDTO): Promise<Payrolls>
@@ -33,6 +34,17 @@ export class PayrollsService implements IPayrollsService {
 
     async getAll(): Promise<Payrolls[]> {
         return await this.prismaService.payrolls.findMany();
+    }
+
+    async getRange(startDate: Date, endDate: Date): Promise<Payrolls[]> {
+        return await this.prismaService.payrolls.findMany({
+            where: {
+                date: {
+                    lte: endDate,
+                    gte: startDate,
+                }
+            }
+        });
     }
 
     async getFirstOrDefault(id: string): Promise<Payrolls> {

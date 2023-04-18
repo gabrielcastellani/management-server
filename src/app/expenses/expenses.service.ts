@@ -6,6 +6,7 @@ import { UpdateExpenseDTO } from './dtos/update-expense-dto';
 
 export interface IExpensesService {
     getAll(): Promise<Expenses[]>
+    getRange(startDate: Date, endDate: Date): Promise<Expenses[]>
     getFirstOrDefault(id: string): Promise<Expenses>
     create(createExpenseDTO: CreateExpenseDTO): Promise<Expenses>
     update(id: string, updateExpenseDTO: UpdateExpenseDTO): Promise<Expenses>
@@ -21,6 +22,17 @@ export class ExpensesService implements IExpensesService {
 
     async getAll(): Promise<Expenses[]> {
         return this.prismaService.expenses.findMany();
+    }
+
+    async getRange(startDate: Date, endDate: Date): Promise<Expenses[]> {
+        return this.prismaService.expenses.findMany({
+            where: {
+                date: {
+                    lte: endDate,
+                    gte: startDate,
+                }
+            }
+        });
     }
 
     async getFirstOrDefault(id: string): Promise<Expenses> {

@@ -9,6 +9,7 @@ import { UpdateProductDTO } from './dtos/update-product-dto';
 
 export interface IProductsService {
     getAll(): Promise<Products[]>
+    getRange(startDate: Date, endDate: Date): Promise<Products[]>
     getAllFromStatus(productStatus: ProductStatus): Promise<Products[]>
     getFirstOrDefault(id: string): Promise<Products>
     getAllFromCustomer(idCustomer: string): Promise<Products[]>
@@ -29,6 +30,17 @@ export class ProductsService implements IProductsService {
 
     async getAll(): Promise<Products[]> {
         return await this.prismaService.products.findMany();
+    }
+
+    async getRange(startDate: Date, endDate: Date): Promise<Products[]> {
+        return await this.prismaService.products.findMany({
+            where: {
+                completionDate: {
+                    lte: endDate,
+                    gte: startDate,
+                }
+            }
+        });
     }
 
     async getAllFromStatus(productStatus: ProductStatus): Promise<Products[]> {
